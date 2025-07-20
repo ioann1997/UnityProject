@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -5,18 +6,36 @@ using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCou
 
 public class CounterView : MonoBehaviour
 {
+    const int LeftButtonMouse = 0;
+
     [SerializeField] private TextMeshProUGUI _counterText;
     [SerializeField] private Animator _timerAnimator;
     [SerializeField] private AnimationClip _timerClip;
 
+    private Counter _counter;
     private float _delay = 0.5f;
-    private int _counter = 0;
+    private int _Currentcounter = 0;
     private Coroutine _counterCoroutine = null;
 
 
+    private void OnEnabled()
+    {
+        _counter.ValueChanged += OnValueChanged;
+    }
+
+    private void OnDisable()
+    {
+        _counter.ValueChanged -= OnValueChanged;
+    }
+
+    private void OnValueChanged(int count)
+    {
+        _counterText.text = count.ToString("");
+    }
+
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(LeftButtonMouse))
         {
             if(_timerAnimator != null)
             {
@@ -39,16 +58,12 @@ public class CounterView : MonoBehaviour
     {
         var wait = new WaitForSeconds(delay);
 
-        while (_counter >=0 )
+        while (enabled)
         {
-            DisplayCountUp(_counter);
-            _counter++;
+            OnValueChanged(_Currentcounter);
+            _Currentcounter++;
+            Debug.Log(_counter.CurrentNumber.ToString());
             yield return wait;
         }
-    }
-
-    private void DisplayCountUp(int count)
-    {
-        _counterText.text = count.ToString("");
     }
 }
