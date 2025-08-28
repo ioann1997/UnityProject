@@ -5,38 +5,32 @@ using System.Collections.Generic;
 public class CubeSpawner : MonoBehaviour
 {
     [Header("Spawn Settings")]
-    [SerializeField] private GameObject _cubePrefab; // префаб куба для создания
-    [SerializeField] private float _spawnInterval = 2f; // интервал между созданием кубов
-    [SerializeField] private int _maxCubesOnScene = 10; // максимальное количество кубов на сцене
-    [SerializeField] private Vector3 _spawnAreaSize = new Vector3(18f, 18f, 18f); // размер области спавна (чуть меньше комнаты 20x20x20)
+    [SerializeField] private Cube _cubePrefab;
+    [SerializeField] private float _spawnInterval = 2f;
+    [SerializeField] private Vector3 _spawnAreaSize = new Vector3(18f, 18f, 18f);
     
     [Header("Cube Properties")]
-    [SerializeField] private float _minScale = 3f; // минимальный размер куба
-    [SerializeField] private float _maxScale = 3f; // максимальный размер куба (фиксированный размер 3x3x3)
-    [SerializeField] private bool _randomizeRotation = true; // случайный поворот куба
-    [SerializeField] private float _splitChanceReduction = 0.5f; // уменьшение шанса разделения для новых кубов
+    [SerializeField] private float _minScale = 3f;
+    [SerializeField] private float _maxScale = 3f;
+    [SerializeField] private bool _randomizeRotation = true;
+    [SerializeField] private float _splitChanceReduction = 0.5f;
     
     [Header("Split Settings")]
-    [SerializeField] private int _minSplitCubes = 2; // минимальное количество кубов при разделении
-    [SerializeField] private int _maxSplitCubes = 6; // максимальное количество кубов при разделении
+    [SerializeField] private int _minSplitCubes = 2;
+    [SerializeField] private int _maxSplitCubes = 6;
     
     private bool _isSpawning = false;
-    private int _currentCubeCount = 0;
-    private List<GameObject> _spawnedCubes = new List<GameObject>();
-    
-    // Публичное свойство для получения количества кубов
-    public int CurrentCubeCount => _currentCubeCount;
+    private int _countStartCube = 3;
+    private List<Cube> _spawnedCubes = new List<Cube>();
     
     private void Start()
     {
-        // Проверяем настройки
         if (_cubePrefab == null)
         {
             Debug.LogError("CubeSpawner: Cube Prefab не назначен! Назначьте префаб куба в инспекторе.");
             return;
         }
         
-        // Проверяем, что у префаба есть компонент Cube
         Cube cubeComponent = _cubePrefab.GetComponent<Cube>();
         if (cubeComponent == null)
         {
@@ -44,16 +38,15 @@ public class CubeSpawner : MonoBehaviour
             return;
         }
         
-        Debug.Log($"CubeSpawner: Начинаем спавн. Интервал: {_spawnInterval}, Макс кубов: {_maxCubesOnScene}");
+        Debug.Log($"CubeSpawner: Начинаем спавн. Интервал: {_spawnInterval}");
         Debug.Log($"CubeSpawner: Префаб куба: {_cubePrefab.name}");
         
-        // Начинаем спавн кубов
         StartSpawning();
     }
     
     private void StartSpawning()
     {
-        if (!_isSpawning)
+        if (_isSpawning == false)
         {
             _isSpawning = true;
             StartCoroutine(SpawnRoutine());
@@ -68,110 +61,71 @@ public class CubeSpawner : MonoBehaviour
     
     private IEnumerator SpawnRoutine()
     {
-        while (_isSpawning)
+        for (int i = 0; i < _countStartCube; i++)
         {
-            if (_currentCubeCount < _maxCubesOnScene)
-            {
                 SpawnCube();
-            }
             
             yield return new WaitForSeconds(_spawnInterval);
         }
+        StopSpawning();
     }
     
     private void SpawnCube()
     {
-        // Генерируем случайную позицию в области спавна
         Vector3 randomPosition = GetRandomSpawnPosition();
         
         Debug.Log($"CubeSpawner: Создаем куб в позиции {randomPosition}");
         
-        // Создаем куб
-        GameObject newCube = Instantiate(_cubePrefab, randomPosition, GetRandomRotation());
-        
-        // Получаем компонент Cube
-        Cube cubeComponent = newCube.GetComponent<Cube>();
-        if (cubeComponent != null)
-        {
-            // Устанавливаем случайный размер
-            float randomScale = Random.Range(_minScale, _maxScale);
-            cubeComponent.SetScale(Vector3.one * randomScale);
+        Cube cube = Instantiate(_cubePrefab, randomPosition, GetRandomRotation());
+
+        float randomScale = Random.Range(_minScale, _maxScale);
+        cube.Initialize(Vector3.one * randomScale);
+
+        cube.SetRandomColor();
             
-            // Устанавливаем случайный цвет
-            cubeComponent.SetRandomColor();
-            
-            Debug.Log($"CubeSpawner: Куб создан с размером {randomScale}");
-        }
-        else
-        {
-            Debug.LogWarning("CubeSpawner: У созданного куба нет компонента Cube!");
-        }
-        
-        // Увеличиваем счетчик кубов
-        _currentCubeCount++;
-        _spawnedCubes.Add(newCube);
-        
-        Debug.Log($"CubeSpawner: Всего кубов на сцене: {_currentCubeCount}");
-        
-        // Подписываемся на уничтожение куба
-        StartCoroutine(MonitorCubeDestruction(newCube));
+        Debug.Log($"CubeSpawner: Куб создан с размером {randomScale}");
+
+        _spawnedCubes.Add(cube);
     }
     
-    // Метод для создания кубов при разделении
-    public List<GameObject> SpawnSplitCubes(Vector3 position, Vector3 originalScale, float originalSplitChance, int count)
+    public List<Cube> SpawnSplitCubes(Vector3 position, Vector3 originalScale, float originalSplitChance, int count)
     {
-        List<GameObject> newCubes = new List<GameObject>();
+        List<Cube> cubes = new List<Cube>();
         
         for (int i = 0; i < count; i++)
         {
-            // Создаем куб
-            GameObject newCube = Instantiate(_cubePrefab, position, Quaternion.identity);
+            Cube cube = Instantiate(_cubePrefab, position, Quaternion.identity);
             
-            // Получаем компонент Cube
-            Cube cubeComponent = newCube.GetComponent<Cube>();
+            Cube cubeComponent = cube.GetComponent<Cube>();
             if (cubeComponent != null)
             {
-                // Устанавливаем размер меньше оригинального
                 Vector3 newScale = originalScale * cubeComponent.ScaleMultiplier;
-                cubeComponent.SetScale(newScale);
-                
-                // Уменьшаем шанс разделения
                 float newSplitChance = originalSplitChance * _splitChanceReduction;
-                cubeComponent.SetSplitChance(newSplitChance);
+                cubeComponent.Initialize(newSplitChance, cubeComponent.ScaleMultiplier, newScale);
                 
-                // Устанавливаем случайный цвет
                 cubeComponent.SetRandomColor();
             }
             
-            // Добавляем случайное смещение
             Vector3 randomOffset = new Vector3(
                 Random.Range(-1f, 1f),
                 Random.Range(-1f, 1f),
                 Random.Range(-1f, 1f)
             );
-            newCube.transform.position = position + randomOffset;
+            cube.transform.position = position + randomOffset;
             
-            newCubes.Add(newCube);
-            _currentCubeCount++;
-            _spawnedCubes.Add(newCube);
-            
-            // Подписываемся на уничтожение куба
-            StartCoroutine(MonitorCubeDestruction(newCube));
+            cubes.Add(cube);
+            _spawnedCubes.Add(cube);
         }
         
-        return newCubes;
+        return cubes;
     }
     
-    // Метод для разделения куба (новая логика)
-    public List<GameObject> SplitCube(Vector3 position, Vector3 originalScale, float originalSplitChance)
+    public List<Cube> SplitCube(Vector3 position, Vector3 originalScale, float originalSplitChance)
     {
-        // Определяем случайное количество новых кубов
-        // Random.Range для int: [min, max) - не включает max, поэтому используем max + 1
         int cubeCount = Random.Range(_minSplitCubes, _maxSplitCubes + 1);
         
         Debug.Log($"CubeSpawner: Разделяем куб на {cubeCount} кубов (диапазон: {_minSplitCubes}-{_maxSplitCubes})");
         
-        // Создаем новые кубы
         return SpawnSplitCubes(position, originalScale, originalSplitChance, cubeCount);
     }
     
@@ -201,29 +155,9 @@ public class CubeSpawner : MonoBehaviour
         return Quaternion.identity;
     }
     
-    private IEnumerator MonitorCubeDestruction(GameObject cube)
-    {
-        // Ждем, пока куб не будет уничтожен
-        yield return new WaitUntil(() => cube == null);
-        
-        // Уменьшаем счетчик кубов
-        _currentCubeCount--;
-        _spawnedCubes.Remove(cube);
-    }
-    
-    // Метод для ручного создания куба
-    public void SpawnCubeManually()
-    {
-        if (_currentCubeCount < _maxCubesOnScene)
-        {
-            SpawnCube();
-        }
-    }
-    
-    // Метод для очистки всех кубов на сцене
     public void ClearAllCubes()
     {
-        foreach (GameObject cube in _spawnedCubes.ToArray())
+        foreach (Cube cube in _spawnedCubes.ToArray())
         {
             if (cube != null)
             {
@@ -231,24 +165,11 @@ public class CubeSpawner : MonoBehaviour
             }
         }
         _spawnedCubes.Clear();
-        _currentCubeCount = 0;
     }
     
-    // Визуализация области спавна в редакторе
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireCube(transform.position, _spawnAreaSize);
-    }
-    
-    // Методы для управления спавном
-    public void SetSpawnInterval(float newInterval)
-    {
-        _spawnInterval = Mathf.Max(0.1f, newInterval);
-    }
-    
-    public void SetMaxCubes(int newMax)
-    {
-        _maxCubesOnScene = Mathf.Max(1, newMax);
     }
 }

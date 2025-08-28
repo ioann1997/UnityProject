@@ -9,7 +9,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private InputHandler _inputHandler;
     
     public static GameManager Instance { get; private set; }
-    
+
+    [System.Obsolete]
     private void Awake()
     {
         // Singleton pattern для единственного экземпляра
@@ -80,7 +81,7 @@ public class GameManager : MonoBehaviour
                 float currentSplitChance = cubeComponent.SplitChance;
                 
                 // Создаем новые кубы через спавнер
-                List<GameObject> newCubes = _cubeSpawner.SplitCube(
+                List<Cube> newCubes = _cubeSpawner.SplitCube(
                     currentPosition, 
                     currentScale, 
                     currentSplitChance
@@ -132,15 +133,5 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 1f;
         
         Debug.Log("Игра перезапущена");
-    }
-    
-    // Метод для получения статистики
-    public int GetCurrentCubeCount()
-    {
-        if (_cubeSpawner != null)
-        {
-            return _cubeSpawner.CurrentCubeCount;
-        }
-        return 0;
     }
 }

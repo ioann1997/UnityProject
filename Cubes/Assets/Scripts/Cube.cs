@@ -9,8 +9,24 @@ public class Cube : MonoBehaviour
     private Rigidbody _rigidbody;
     private Renderer _renderer;
     
-    public float SplitChance => _splitChance;
-    public float ScaleMultiplier => _scaleMultiplier;
+    // Свойства с контролируемым доступом
+    public float SplitChance 
+    { 
+        get => _splitChance; 
+        private set => _splitChance = Mathf.Clamp01(value); 
+    }
+    
+    public float ScaleMultiplier 
+    { 
+        get => _scaleMultiplier; 
+        private set => _scaleMultiplier = Mathf.Clamp01(value); 
+    }
+    
+    public Vector3 Scale 
+    { 
+        get => transform.localScale; 
+        private set => transform.localScale = value; 
+    }
     
     private void Awake()
     {
@@ -18,27 +34,25 @@ public class Cube : MonoBehaviour
         _renderer = GetComponent<Renderer>();
     }
     
-    public void SetSplitChance(float newChance)
+    
+    public void Initialize(Vector3 scale)
     {
-        _splitChance = Mathf.Clamp01(newChance);
+        Scale = scale;
     }
     
-    public void SetScaleMultiplier(float newMultiplier)
+    public void Initialize(float splitChance, float scaleMultiplier, Vector3 scale)
     {
-        _scaleMultiplier = Mathf.Clamp01(newMultiplier);
+        SplitChance = splitChance;
+        ScaleMultiplier = scaleMultiplier;
+        Scale = scale;
     }
     
     public void SetRandomColor()
     {
         if (_renderer != null)
         {
-            _renderer.material.color = GetRandomColor();
+            _renderer.material.color = Random.ColorHSV();
         }
-    }
-    
-    public void SetScale(Vector3 scale)
-    {
-        transform.localScale = scale;
     }
     
     public void AddForce(Vector3 force, ForceMode forceMode = ForceMode.Impulse)
@@ -47,15 +61,5 @@ public class Cube : MonoBehaviour
         {
             _rigidbody.AddForce(force, forceMode);
         }
-    }
-    
-    private Color GetRandomColor()
-    {
-        return new Color(
-            Random.Range(0f, 1f),
-            Random.Range(0f, 1f),
-            Random.Range(0f, 1f),
-            1f
-        );
     }
 }

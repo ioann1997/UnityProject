@@ -35,7 +35,6 @@ public class InputHandler : MonoBehaviour
     private void Update()
     {
         HandleMouseInput();
-        HandleKeyboardInput();
     }
     
     private void HandleMouseInput()
@@ -66,63 +65,5 @@ public class InputHandler : MonoBehaviour
             // Уведомляем о клике по позиции в мире
             OnWorldPositionClicked?.Invoke(hit.point);
         }
-    }
-    
-    private void HandleKeyboardInput()
-    {
-        // Обработка клавиатуры
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            // Пробел - создать куб вручную
-            CubeSpawner spawner = FindObjectOfType<CubeSpawner>();
-            if (spawner != null)
-            {
-                spawner.SpawnCubeManually();
-            }
-        }
-        
-        if (Input.GetKeyDown(KeyCode.C))
-        {
-            // C - очистить все кубы
-            CubeSpawner spawner = FindObjectOfType<CubeSpawner>();
-            if (spawner != null)
-            {
-                spawner.ClearAllCubes();
-            }
-        }
-        
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            // Escape - выход из игры
-            #if UNITY_EDITOR
-                UnityEditor.EditorApplication.isPlaying = false;
-            #else
-                Application.Quit();
-            #endif
-        }
-    }
-    
-    // Метод для проверки, находится ли позиция в пределах экрана
-    public bool IsPositionOnScreen(Vector3 worldPosition)
-    {
-        Vector3 screenPoint = _mainCamera.WorldToScreenPoint(worldPosition);
-        return screenPoint.x >= 0 && screenPoint.x <= Screen.width &&
-               screenPoint.y >= 0 && screenPoint.y <= Screen.height &&
-               screenPoint.z > 0;
-    }
-    
-    // Метод для получения позиции мыши в мировых координатах
-    public Vector3 GetMouseWorldPosition()
-    {
-        Ray ray = _mainCamera.ScreenPointToRay(Input.mousePosition);
-        Plane plane = new Plane(Vector3.up, Vector3.zero);
-        float distance;
-        
-        if (plane.Raycast(ray, out distance))
-        {
-            return ray.GetPoint(distance);
-        }
-        
-        return Vector3.zero;
     }
 }
