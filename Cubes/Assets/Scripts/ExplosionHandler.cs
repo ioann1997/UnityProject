@@ -22,9 +22,19 @@ public class ExplosionHandler : MonoBehaviour
         }
     }
     
-    private void OnDrawGizmosSelected()
+    public void CreateExplosionAtPosition(Vector3 explosionCenter)
     {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, _explosionRadius);
+        Collider[] colliders = Physics.OverlapSphere(explosionCenter, _explosionRadius, _affectedLayers);
+        
+        foreach (Collider collider in colliders)
+        {
+            if (collider == null) continue;
+            
+            Rigidbody rigidBody = collider.GetComponent<Rigidbody>();
+            if (rigidBody != null)
+            {
+                rigidBody.AddExplosionForce(_explosionForce, explosionCenter, _explosionRadius, 0f, ForceMode.Impulse);
+            }
+        }
     }
 }
