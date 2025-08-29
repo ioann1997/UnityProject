@@ -14,11 +14,10 @@ public class ExplosionHandler : MonoBehaviour
         {
             if (cube == null) continue;
             
-            Rigidbody rigidBody = cube.GetComponent<Rigidbody>();
-            if (rigidBody != null)
-            {
-                rigidBody.AddExplosionForce(_explosionForce, explosionCenter, _explosionRadius, 0f, ForceMode.Impulse);
-            }
+            Rigidbody rigidBody = cube.Rigidbody;
+
+            rigidBody.AddExplosionForce(_explosionForce, explosionCenter, _explosionRadius, 0f, ForceMode.Impulse);
+            
         }
     }
     

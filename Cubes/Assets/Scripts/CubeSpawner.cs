@@ -46,7 +46,7 @@ public class CubeSpawner : MonoBehaviour
     private void StopSpawning()
     {
         _isSpawning = false;
-        StopAllCoroutines();
+        StopCoroutine(SpawnRoutine());
     }
 
     private IEnumerator SpawnRoutine()

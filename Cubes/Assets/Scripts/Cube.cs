@@ -10,6 +10,11 @@ public class Cube : MonoBehaviour
     private Rigidbody _rigidbody;
     private Renderer _renderer;
 
+    public Rigidbody Rigidbody
+    {
+        get { return _rigidbody; }
+    }
+
     public float SplitChance
     {
         get => _splitChance;
