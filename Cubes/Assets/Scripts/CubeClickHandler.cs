@@ -19,16 +19,13 @@ public class CubeClickHandler : MonoBehaviour
         
     }
     
-    private void HandleCubeClicked(GameObject clickedCube)
+    private void HandleCubeClicked(Cube clickedCube)
     {
-        Cube cubeComponent = clickedCube.GetComponent<Cube>();
-        if (cubeComponent == null) return;
-        
-        if (Random.Range(0f, 1f) < cubeComponent.SplitChance)
+        if (Random.Range(0f, 1f) < clickedCube.SplitChance)
         {
             Vector3 currentPosition = clickedCube.transform.position;
             Vector3 currentScale = clickedCube.transform.localScale;
-            float currentSplitChance = cubeComponent.SplitChance;
+            float currentSplitChance = clickedCube.SplitChance;
                 
             List<Cube> newCubes = _cubeSpawner.SplitCube(
                 currentPosition, 
@@ -38,6 +35,6 @@ public class CubeClickHandler : MonoBehaviour
                     
             _explosionHandler.CreateExplosion(currentPosition, newCubes);
         }   
-        Destroy(clickedCube);
+        Destroy(clickedCube.gameObject);
     }
 }

@@ -6,7 +6,7 @@ public class InputHandler : MonoBehaviour
     [SerializeField] private LayerMask _clickableLayers = -1;
     [SerializeField] private Camera _mainCamera;
     
-    public System.Action<GameObject> OnCubeClicked;
+    public System.Action<Cube> OnCubeClicked;
     public System.Action<Vector3> OnWorldPositionClicked;
     
     private void Update()
@@ -31,10 +31,9 @@ public class InputHandler : MonoBehaviour
         {
             GameObject clickedObject = hit.collider.gameObject;
             
-            Cube cube = clickedObject.GetComponent<Cube>();
-            if (cube != null)
+            if (clickedObject.TryGetComponent<Cube>(out Cube cube))
             {
-                OnCubeClicked?.Invoke(clickedObject);
+                OnCubeClicked?.Invoke(cube);
             }
             
             OnWorldPositionClicked?.Invoke(hit.point);
