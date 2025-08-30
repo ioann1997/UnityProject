@@ -14,7 +14,8 @@ public class ExplosionHandler : MonoBehaviour
     {
         foreach (Cube cube in affectedCubes)
         {
-            if (cube == null) continue;
+            if (cube == null) 
+                continue;
             
             Rigidbody rigidBody = cube.Rigidbody;
 

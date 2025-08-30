@@ -1,6 +1,7 @@
 using Unity.VisualScripting;
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
 public class Cube : MonoBehaviour
 {
     [Header("Cube Properties")]
@@ -9,6 +10,7 @@ public class Cube : MonoBehaviour
 
     private Rigidbody _rigidbody;
     private Renderer _renderer;
+    private ColorChanger _colorChanger;
 
     public Rigidbody Rigidbody
     {
@@ -37,6 +39,7 @@ public class Cube : MonoBehaviour
     {
         _rigidbody = GetComponent<Rigidbody>();
         _renderer = GetComponent<Renderer>();
+        _colorChanger = GetComponent<ColorChanger>();
     }
 
 
@@ -54,8 +57,7 @@ public class Cube : MonoBehaviour
 
     public void SetRandomColor()
     {
-        ColorChanger colorChanger = GetComponent<ColorChanger>();
-        colorChanger = gameObject.AddComponent<ColorChanger>();
-        colorChanger.SetRandomColor(_renderer);
+        _colorChanger = gameObject.AddComponent<ColorChanger>();
+        _colorChanger.SetRandomColor(_renderer);
     }
 }

@@ -10,13 +10,12 @@ public class CubeClickHandler : MonoBehaviour
     
     private void Start()
     {
-        _inputHandler.OnCubeClicked += HandleCubeClicked;
+        _inputHandler.CubeClicked += HandleCubeClicked;
     }
     
     private void OnDestroy()
     {
-        _inputHandler.OnCubeClicked -= HandleCubeClicked;
-        
+        _inputHandler.CubeClicked -= HandleCubeClicked;
     }
     
     private void HandleCubeClicked(Cube clickedCube)
