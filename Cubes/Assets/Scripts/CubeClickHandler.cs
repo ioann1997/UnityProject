@@ -7,15 +7,23 @@ public class CubeClickHandler : MonoBehaviour
     [SerializeField] private CubeSpawner _cubeSpawner;
     [SerializeField] private ExplosionHandler _explosionHandler;
     [SerializeField] private InputHandler _inputHandler;
+    [SerializeField] private Raycaster _raycaster;
     
     private void Start()
     {
-        _inputHandler.CubeClicked += HandleCubeClicked;
+        _inputHandler.MouseLeftClick += OnMouseLeftClick;
+        _raycaster.CubeHit += HandleCubeClicked;
     }
     
     private void OnDestroy()
     {
-        _inputHandler.CubeClicked -= HandleCubeClicked;
+        _inputHandler.MouseLeftClick -= OnMouseLeftClick;
+        _raycaster.CubeHit -= HandleCubeClicked;
+    }
+    
+    private void OnMouseLeftClick()
+    {
+        _raycaster.PerformRaycast();
     }
     
     private void HandleCubeClicked(Cube clickedCube)

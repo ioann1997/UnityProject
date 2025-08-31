@@ -1,7 +1,7 @@
 using Unity.VisualScripting;
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(Rigidbody)), RequireComponent(typeof(ColorChanger))]
 public class Cube : MonoBehaviour
 {
     [Header("Cube Properties")]
@@ -12,10 +12,7 @@ public class Cube : MonoBehaviour
     private Renderer _renderer;
     private ColorChanger _colorChanger;
 
-    public Rigidbody Rigidbody
-    {
-        get { return _rigidbody; }
-    }
+    public Rigidbody Rigidbody => _rigidbody;
 
     public float SplitChance
     {
@@ -42,7 +39,6 @@ public class Cube : MonoBehaviour
         _colorChanger = GetComponent<ColorChanger>();
     }
 
-
     public void Initialize(Vector3 scale)
     {
         Scale = scale;
@@ -57,7 +53,6 @@ public class Cube : MonoBehaviour
 
     public void SetRandomColor()
     {
-        _colorChanger = gameObject.AddComponent<ColorChanger>();
         _colorChanger.SetRandomColor(_renderer);
     }
 }

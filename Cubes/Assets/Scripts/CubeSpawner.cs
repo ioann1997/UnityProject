@@ -23,7 +23,6 @@ public class CubeSpawner : MonoBehaviour
     [SerializeField] private int _countStartCube = 3;
 
     private float _randomOffsetRange = 1f;
-    private float _randomSpawnAreaSize = 0.5f;
     private float _maxRotationAngle = 360f;
 
     private bool _isSpawning = false;
@@ -32,46 +31,6 @@ public class CubeSpawner : MonoBehaviour
     private void Start()
     {
         StartSpawning();
-    }
-
-    private void StartSpawning()
-    {
-        if (_isSpawning == false)
-        {
-            _isSpawning = true;
-            StartCoroutine(SpawnRoutine());
-        }
-    }
-
-    private void StopSpawning()
-    {
-        _isSpawning = false;
-        StopCoroutine(SpawnRoutine());
-    }
-
-    private IEnumerator SpawnRoutine()
-    {
-        for (int i = 0; i < _countStartCube; i++)
-        {
-            SpawnCube();
-
-            yield return new WaitForSeconds(_spawnInterval);
-        }
-        StopSpawning();
-    }
-
-    private void SpawnCube()
-    {
-        Vector3 randomPosition = GetRandomSpawnPosition();
-
-        Cube cube = Instantiate(_cubePrefab, randomPosition, GetRandomRotation());
-
-        float randomScale = Random.Range(_minScale, _maxScale);
-        cube.Initialize(Vector3.one * randomScale);
-
-        cube.SetRandomColor();
-
-        _spawnedCubes.Add(cube);
     }
 
     public List<Cube> SpawnSplitCubes(Vector3 position, Vector3 originalScale, float originalSplitChance, int count)
@@ -109,13 +68,53 @@ public class CubeSpawner : MonoBehaviour
         return SpawnSplitCubes(position, originalScale, originalSplitChance, cubeCount);
     }
 
+    private void StartSpawning()
+    {
+        if (_isSpawning == false)
+        {
+            _isSpawning = true;
+            StartCoroutine(SpawnRoutine());
+        }
+    }
+
+    private void StopSpawning()
+    {
+        _isSpawning = false;
+        StopAllCoroutines();
+    }
+
+    private IEnumerator SpawnRoutine()
+    {
+        for (int i = 0; i < _countStartCube; i++)
+        {
+            SpawnCube();
+
+            yield return new WaitForSeconds(_spawnInterval);
+        }
+        StopSpawning();
+    }
+
+    private void SpawnCube()
+    {
+        Vector3 randomPosition = GetRandomSpawnPosition();
+
+        Cube cube = Instantiate(_cubePrefab, randomPosition, GetRandomRotation());
+
+        float randomScale = Random.Range(_minScale, _maxScale);
+        cube.Initialize(Vector3.one * randomScale);
+
+        cube.SetRandomColor();
+
+        _spawnedCubes.Add(cube);
+    }
+
     private Vector3 GetRandomSpawnPosition()
     {
         Vector3 center = transform.position;
         Vector3 randomOffset = new Vector3(
-            Random.Range(-_spawnAreaSize.x * _randomSpawnAreaSize, _spawnAreaSize.x * _randomSpawnAreaSize),
-            Random.Range(-_spawnAreaSize.y * _randomSpawnAreaSize, _spawnAreaSize.y * _randomSpawnAreaSize),
-            Random.Range(-_spawnAreaSize.z * _randomSpawnAreaSize, _spawnAreaSize.z * _randomSpawnAreaSize)
+            Random.Range(-_spawnAreaSize.x * 0.5f, _spawnAreaSize.x * 0.5f),
+            Random.Range(-_spawnAreaSize.y * 0.5f, _spawnAreaSize.y * 0.5f),
+            Random.Range(-_spawnAreaSize.z * 0.5f, _spawnAreaSize.z * 0.5f)
         );
 
         return center + randomOffset;
