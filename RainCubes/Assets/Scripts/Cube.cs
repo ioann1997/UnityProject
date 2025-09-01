@@ -9,7 +9,6 @@ public class Cube : MonoBehaviour
     private Renderer _renderer;
     private ColorChanger _colorChanger;
     private float _lifeTime;
-    private CubePool _cubePool;
 
     private bool _hasLandedOnPlatform = false;
 
@@ -20,23 +19,18 @@ public class Cube : MonoBehaviour
         _colorChanger = GetComponent<ColorChanger>();
     }
 
-    public void ResetCube()
+    public void Reset()
     {
         _hasLandedOnPlatform = false;
         _lifeTime = 0f;
         _renderer.material.color = Color.blue;
 
-        // Сбрасываем физику
         if (_rigidbody != null)
         {
             _rigidbody.linearVelocity = Vector3.zero;
             _rigidbody.angularVelocity = Vector3.zero;
         }
-    }
-
-    public void SetCubePool(CubePool pool)
-    {
-        _cubePool = pool;
+        transform.rotation = Quaternion.identity;
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -64,7 +58,7 @@ public class Cube : MonoBehaviour
     private IEnumerator LifeTimeCountdown()
     {
         yield return new WaitForSeconds(_lifeTime);
-        
-        _cubePool.ReturnCube(this);
+
+        Destroy(gameObject);
     }
 }

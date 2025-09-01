@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
+using UnityEngine.Pool;
 
 public class CubeSpawner : MonoBehaviour
 {
@@ -9,15 +9,30 @@ public class CubeSpawner : MonoBehaviour
     [SerializeField] private Vector3 _spawnAreaSize = new Vector3(10f, 18f, 10f);
     [SerializeField] private float _spawnHeight = 18f;
 
-    [Header("Pool Reference")]
-    [SerializeField] private CubePool _cubePool;
+    [Header("Pool Settings")]
+    [SerializeField] private Cube _cubePrefab;
+    [SerializeField] private int _poolSize = 50;
+    [SerializeField] private Color _cubeColor = Color.blue;
+
+    private ObjectPool<Cube> _objectPool;
+    private Transform _poolParent;
+
+    private WaitForSeconds _spawnWait;
+    
+    private void Awake()
+    {
+        _poolParent = new GameObject("CubePool").transform;
+        _poolParent.SetParent(transform);
+        InitializePool();
+        _spawnWait = new WaitForSeconds(_spawnInterval);
+    }
 
     private IEnumerator SpawnRoutine()
     {
         while (enabled)
         {
             SpawnCube();
-            yield return new WaitForSeconds(_spawnInterval);
+            yield return _spawnWait;
         }
     }
 
@@ -25,11 +40,9 @@ public class CubeSpawner : MonoBehaviour
     {
         Vector3 randomPosition = GetRandomSpawnPosition();
 
-        Cube cube = _cubePool.GetCube();
+        Cube cube = GetCube();
         cube.transform.position = randomPosition;
         cube.transform.rotation = Quaternion.identity;
-
-        cube.SetCubePool(_cubePool);
     }
 
     private Vector3 GetRandomSpawnPosition()
@@ -43,6 +56,56 @@ public class CubeSpawner : MonoBehaviour
 
         return center + randomOffset;
     }
+
+    private void InitializePool()
+    {
+        _objectPool = new ObjectPool<Cube>(
+            createFunc: CreateCube,
+            actionOnGet: OnCubeGet,
+            actionOnRelease: OnCubeRelease,
+            actionOnDestroy: OnCubeDestroy,
+            collectionCheck: true,
+            defaultCapacity: _poolSize,
+            maxSize: _poolSize * 2
+        );
+    }
+
+    private Cube CreateCube()
+    {
+        Cube cube = Instantiate(_cubePrefab, _poolParent);
+        cube.gameObject.SetActive(false);
+
+        return cube;
+    }
+
+    private void OnCubeGet(Cube cube)
+    {
+        cube.gameObject.SetActive(true);
+    }
+
+    private void OnCubeRelease(Cube cube)
+    {
+        cube.gameObject.SetActive(false);
+        cube.transform.SetParent(_poolParent);
+        cube.transform.localPosition = Vector3.zero;
+        cube.transform.localRotation = Quaternion.identity;
+
+        cube.Reset();
+    }
+
+    private void OnCubeDestroy(Cube cube)
+    {
+        if (cube != null)
+        {
+            Destroy(cube.gameObject);
+        }
+    }
+
+    public Cube GetCube()
+    {
+        return _objectPool.Get();
+    }
+
     public void StartSpawningCubes()
     {
         StartCoroutine(SpawnRoutine());
