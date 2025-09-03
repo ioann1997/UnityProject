@@ -31,7 +31,7 @@ public class CubeSpawner : MonoBehaviour
     {
         while (enabled)
         {
-            Cube cube = _objectPool.Get();
+            _objectPool.Get();
            
             yield return _spawnWait;
         }
@@ -74,12 +74,12 @@ public class CubeSpawner : MonoBehaviour
         cube.gameObject.SetActive(true);
         cube.transform.position = GetRandomSpawnPosition();
         
-        cube.OnLifeTimeExpired += OnCubeLifeTimeExpired;
+        cube.LifeTimeExpired += OnCubeLifeTimeExpired;
     }
 
     private void OnCubeRelease(Cube cube)
     {
-        cube.OnLifeTimeExpired -= OnCubeLifeTimeExpired;       
+        cube.LifeTimeExpired -= OnCubeLifeTimeExpired;       
         cube.gameObject.SetActive(false);
 
         cube.Reset();
@@ -95,7 +95,7 @@ public class CubeSpawner : MonoBehaviour
 
     private void OnCubeLifeTimeExpired(Cube cube)
     {
-        cube.OnLifeTimeExpired -= OnCubeLifeTimeExpired;
+        cube.LifeTimeExpired -= OnCubeLifeTimeExpired;
 
         _objectPool.Release(cube);
     }

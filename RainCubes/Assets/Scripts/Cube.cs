@@ -1,6 +1,8 @@
-using Unity.VisualScripting;
 using UnityEngine;
+using System;
 using System.Collections;
+using Random = UnityEngine.Random;
+
 
 [RequireComponent(typeof(Rigidbody)), RequireComponent(typeof(ColorChanger))]
 public class Cube : MonoBehaviour
@@ -13,7 +15,7 @@ public class Cube : MonoBehaviour
     private float _maxlifeTime = 5f;
     private bool _hasLandedOnPlatform = false;
 
-    public event System.Action<Cube> OnLifeTimeExpired;
+    public event Action<Cube> LifeTimeExpired;
 
     private void Awake()
     {
@@ -39,9 +41,9 @@ public class Cube : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.TryGetComponent<Platform>(out Platform platformComponent))
-        {
-            if (_hasLandedOnPlatform == false)
+        if (_hasLandedOnPlatform == false)
+        {     
+            if (collision.gameObject.TryGetComponent<Platform>(out Platform platformComponent))
             {
                 OnLandedOnPlatform();
             }
@@ -56,13 +58,13 @@ public class Cube : MonoBehaviour
 
         _lifeTime = Random.Range(_minlifeTime, _maxlifeTime);
         
-        StartCoroutine(LifeTimeCountdown());        
+        StartCoroutine(CountdownLifeTime());        
     }
 
-    private IEnumerator LifeTimeCountdown()
+    private IEnumerator CountdownLifeTime()
     {
         yield return new WaitForSeconds(_lifeTime);
         
-        OnLifeTimeExpired?.Invoke(this);
+        LifeTimeExpired?.Invoke(this);
     }
 }
