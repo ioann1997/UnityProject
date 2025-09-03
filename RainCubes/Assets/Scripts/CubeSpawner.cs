@@ -11,38 +11,30 @@ public class CubeSpawner : MonoBehaviour
 
     [Header("Pool Settings")]
     [SerializeField] private Cube _cubePrefab;
-    [SerializeField] private int _poolSize = 50;
-    [SerializeField] private Color _cubeColor = Color.blue;
+    [SerializeField] private int _poolSize = 3;
 
     private ObjectPool<Cube> _objectPool;
-    private Transform _poolParent;
-
     private WaitForSeconds _spawnWait;
     
     private void Awake()
     {
-        _poolParent = new GameObject("CubePool").transform;
-        _poolParent.SetParent(transform);
         InitializePool();
         _spawnWait = new WaitForSeconds(_spawnInterval);
+    }
+
+    public void StartSpawningCubes()
+    {
+        StartCoroutine(SpawnRoutine());
     }
 
     private IEnumerator SpawnRoutine()
     {
         while (enabled)
         {
-            SpawnCube();
+            Cube cube = _objectPool.Get();
+           
             yield return _spawnWait;
         }
-    }
-
-    private void SpawnCube()
-    {
-        Vector3 randomPosition = GetRandomSpawnPosition();
-
-        Cube cube = GetCube();
-        cube.transform.position = randomPosition;
-        cube.transform.rotation = Quaternion.identity;
     }
 
     private Vector3 GetRandomSpawnPosition()
@@ -66,14 +58,13 @@ public class CubeSpawner : MonoBehaviour
             actionOnDestroy: OnCubeDestroy,
             collectionCheck: true,
             defaultCapacity: _poolSize,
-            maxSize: _poolSize * 2
+            maxSize: _poolSize
         );
     }
 
     private Cube CreateCube()
     {
-        Cube cube = Instantiate(_cubePrefab, _poolParent);
-        cube.gameObject.SetActive(false);
+        Cube cube = Instantiate(_cubePrefab);
 
         return cube;
     }
@@ -81,14 +72,15 @@ public class CubeSpawner : MonoBehaviour
     private void OnCubeGet(Cube cube)
     {
         cube.gameObject.SetActive(true);
+        cube.transform.position = GetRandomSpawnPosition();
+        
+        cube.OnLifeTimeExpired += OnCubeLifeTimeExpired;
     }
 
     private void OnCubeRelease(Cube cube)
     {
+        cube.OnLifeTimeExpired -= OnCubeLifeTimeExpired;       
         cube.gameObject.SetActive(false);
-        cube.transform.SetParent(_poolParent);
-        cube.transform.localPosition = Vector3.zero;
-        cube.transform.localRotation = Quaternion.identity;
 
         cube.Reset();
     }
@@ -101,13 +93,10 @@ public class CubeSpawner : MonoBehaviour
         }
     }
 
-    public Cube GetCube()
+    private void OnCubeLifeTimeExpired(Cube cube)
     {
-        return _objectPool.Get();
-    }
+        cube.OnLifeTimeExpired -= OnCubeLifeTimeExpired;
 
-    public void StartSpawningCubes()
-    {
-        StartCoroutine(SpawnRoutine());
+        _objectPool.Release(cube);
     }
 }

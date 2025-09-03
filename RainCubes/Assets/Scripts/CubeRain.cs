@@ -16,12 +16,8 @@ public class CubeRain : MonoBehaviour
         }
     }
 
-    public void StartCubeRain()
+    private void StartCubeRain()
     {
-        if (_cubeSpawner != null)
-        {
-            _cubeSpawner.StartSpawningCubes();
-            Debug.Log("Дождь кубов запущен!");
-        }
+         _cubeSpawner.StartSpawningCubes();
     }
 }

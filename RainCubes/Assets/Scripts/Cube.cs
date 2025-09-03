@@ -9,8 +9,11 @@ public class Cube : MonoBehaviour
     private Renderer _renderer;
     private ColorChanger _colorChanger;
     private float _lifeTime;
-
+    private float _minlifeTime = 2f;
+    private float _maxlifeTime = 5f;
     private bool _hasLandedOnPlatform = false;
+
+    public event System.Action<Cube> OnLifeTimeExpired;
 
     private void Awake()
     {
@@ -30,6 +33,7 @@ public class Cube : MonoBehaviour
             _rigidbody.linearVelocity = Vector3.zero;
             _rigidbody.angularVelocity = Vector3.zero;
         }
+
         transform.rotation = Quaternion.identity;
     }
 
@@ -39,18 +43,18 @@ public class Cube : MonoBehaviour
         {
             if (_hasLandedOnPlatform == false)
             {
-                OnLandedOnPlatform(collision.gameObject);
+                OnLandedOnPlatform();
             }
         }
     }
 
-    private void OnLandedOnPlatform(GameObject platformObject = null)
+    private void OnLandedOnPlatform()
     {
         _hasLandedOnPlatform = true;
 
         _colorChanger.SetRandomColor(_renderer);
 
-        _lifeTime = Random.Range(2f, 5f);
+        _lifeTime = Random.Range(_minlifeTime, _maxlifeTime);
         
         StartCoroutine(LifeTimeCountdown());        
     }
@@ -58,7 +62,7 @@ public class Cube : MonoBehaviour
     private IEnumerator LifeTimeCountdown()
     {
         yield return new WaitForSeconds(_lifeTime);
-
-        Destroy(gameObject);
+        
+        OnLifeTimeExpired?.Invoke(this);
     }
 }
