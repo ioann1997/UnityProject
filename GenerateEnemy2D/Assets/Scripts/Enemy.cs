@@ -11,6 +11,7 @@ public class Enemy : MonoBehaviour
     [SerializeField] private float _speed = 5f;
     
     private Vector2 _direction;
+    private Target _target;
     private Rigidbody2D _rigidbody2D;
 
     public event Action<Enemy> LifeTimeExpired;
@@ -25,14 +26,18 @@ public class Enemy : MonoBehaviour
         StartCoroutine(CountdownLifeTime());
     }
 
-    public void SetDirection(Vector2 direction)
-    {
-        _direction = direction;
-    }
-
     private void FixedUpdate()
     {
+        Vector2 targetPosition = _target.CurrentPosition;
+        Vector2 currentPosition = _rigidbody2D.position;
+        _direction = (targetPosition - currentPosition).normalized;
+        
         _rigidbody2D.MovePosition(_rigidbody2D.position + _direction * Time.fixedDeltaTime * _speed);
+    }
+
+    public void SetTarget(Target target)
+    {
+        _target = target;
     }
 
     private IEnumerator CountdownLifeTime()

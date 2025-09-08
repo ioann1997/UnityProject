@@ -7,6 +7,9 @@ public class SpawnerEnemy : MonoBehaviour
     [SerializeField] private Enemy _enemyPrefab;
     [SerializeField] private int _poolSize = 10;
 
+    [Header("Target Settings")]
+    [SerializeField] private Target _target;
+
     private ObjectPool<Enemy> _objectPool;
 
     private void Awake()
@@ -20,11 +23,6 @@ public class SpawnerEnemy : MonoBehaviour
         {
             _objectPool.Get();
         }
-    }
-
-    private Vector2 GetRandomDirection()
-    {
-        return new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f)).normalized;
     }
 
     private void InitializePool()
@@ -52,7 +50,8 @@ public class SpawnerEnemy : MonoBehaviour
     {
         enemy.gameObject.SetActive(true);
         enemy.transform.position = transform.position;
-        enemy.SetDirection(GetRandomDirection());
+
+        enemy.SetTarget(_target);
 
         enemy.LifeTimeExpired += OnEnemyLifeTimeExpired;
     }
