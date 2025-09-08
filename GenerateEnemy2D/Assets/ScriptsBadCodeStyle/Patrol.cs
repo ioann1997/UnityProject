@@ -1,20 +1,13 @@
 using UnityEngine;
 
-public class WaypointPatrol : MonoBehaviour
+public class Patrol : MonoBehaviour
 {
     [SerializeField] private float _moveSpeed;
+    [SerializeField] private Transform _allPlacespoint;
 
-    private Transform _allPlacespoint;
     private Transform[] _arrayPlaces;
     private int _currentPlaceIndex;
 
-    private void Start()
-    {
-        _arrayPlaces = new Transform[_allPlacespoint.childCount];
-
-        for (int i = 0; i < _allPlacespoint.childCount; i++)
-            _arrayPlaces[i] = _allPlacespoint.GetChild(i);
-    }
     private void Update()
     {
         Transform currentPoint = _arrayPlaces[_currentPlaceIndex];
